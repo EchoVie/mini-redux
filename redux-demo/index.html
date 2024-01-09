@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <button id="decrement">  1</button>
+  <span id="count">0</span>
+  <button id="increment"> + 1 </button>
+  <script type="module">
+    import { createStore, combineReducers, bindActionCreators, applyMiddleware } from '../main.js';
+    import logger from '../middlewares/logger.js'
+    import thunk from '../middlewares/thunk.js'
+
+    window.onload= () => {
+      const countNode = document.getElementById('count');
+      const incrementNode = document.getElementById('increment');
+      const decrementNode = document.getElementById('decrement');
+
+      const counterReducer = (state, action) => {
+        switch(action.type) {
+          case 'increment':
+            return state + 1;
+            break;
+
+          case 'decrement':
+            return state - 1;
+            break;
+
+          default:
+        }
+      }
+
+      const rootReducer = combineReducers({ counter: counterReducer })
+
+      const store = createStore(rootReducer, { counter: 0 }, applyMiddleware(logger, thunk))
+
+      store.subscribe(() => {
+        const state = store.getState();
+        countNode.innerHTML = state.counter;
+      })
+
+      const increment = () => ({type: "increment"})
+      const decrement = () => ({type: "decrement"})
+
+      var actions = bindActionCreators({ increment, decrement }, store.dispatch);
+
+      incrementNode.addEventListener('click', () => {
+        actions.increment();
+      })
+
+      decrementNode.addEventListener('click', () => {
+        actions.decrement();
+      })
+    }
+  </script>
+</body>
+</html>
